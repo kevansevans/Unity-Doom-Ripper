@@ -17,8 +17,7 @@ import sys.io.FileInput;
  */
 class Main 
 {
-	static var default_path:String = "C:/Program Files (x86)/Bethesda.net Launcher/games";
-	static var successful_extraction:Bool = false;
+	static var default_install_path:String = "C:/Program Files (x86)/Bethesda.net Launcher/games";
 	static var d1_is_present:Bool = false;
 	static var d2_is_present:Bool = false;
 	static var d1_fileinput:FileInput;
@@ -33,18 +32,21 @@ class Main
 	static var d2_bytearray:Array<Int>;
 	static function main() 
 	{
+		FileSystem.createDirectory("output");
+		
 		Sys.println("Unity Doom IWAD ripper");
 		Sys.println("Checking default Bethesda games install...");
 		
-		checkIfGamesAreThere(default_path);
+		checkIfGamesAreThere(default_install_path);
 		
-		if (successful_extraction) {
-			Sys.println("IWADS Extrtacted");
-			Sys.command("start", ["output"]);
-			Sys.exit(0);
-		}
+		checkForAddonFolder();
+		
+		quit();
 	}
 	static function checkIfGamesAreThere(_path:String) {
+		if (_path.toUpperCase() == "SKIP") {
+			return;
+		}
 		Sys.println("Checking for Doom and Doom II...");
 		if (FileSystem.exists(_path + "/DOOM_Classic_2019/DOOM_Data/StreamingAssets/doom_disk")) {
 			d1_is_present = true;
@@ -62,7 +64,7 @@ class Main
 		}
 		
 		if (!d1_is_present && !d2_is_present) {
-			Sys.println("Doom games not found, please point me to the install folder!");
+			Sys.println("Doom games not found, please point me to the install folder! Type 'skip' to ignore this step");
 			Sys.print(":>");
 			var cmd = Sys.stdin().readLine();
 			checkIfGamesAreThere(cmd);
@@ -73,8 +75,6 @@ class Main
 	}
 	
 	static function extract() {
-		
-		FileSystem.createDirectory("output");
 		
 		if (d1_is_present) {
 			Sys.println("Loading Ultimate Doom...");
@@ -92,7 +92,6 @@ class Main
 			}
 			d1_wad.close();
 			Sys.println("Ultimate Doom Extracted");
-			successful_extraction = true;
 		}
 		
 		if (d2_is_present) {
@@ -111,7 +110,62 @@ class Main
 			}
 			d2_wad.close();
 			Sys.println("Doom II Extracted");
-			successful_extraction = true;
 		}
+		
+		Sys.println("WADS Extrtacted");
+	}
+	static function checkForAddonFolder() 
+	{
+		var d1_addon_path:Null<String> = null;
+		var d2_addon_path:Null<String> = null;
+		Sys.println("Scanning for addons...");
+		var folders:Array<String> = FileSystem.readDirectory("C:/Users");
+		for (dir in folders) {
+			if (FileSystem.isDirectory("C:/Users/" + dir + "/Saved Games/id Software")) {
+				Sys.println("Addon directory found...");
+				if (FileSystem.isDirectory("C:/Users/" + dir + "/Saved Games/id Software/DOOM Classic/WADs")) {
+					d1_addon_path = "C:/Users/" + dir + "/Saved Games/id Software/DOOM Classic/WADs";
+					Sys.println("Ultimate Doom addon directory found");
+				}
+				if (FileSystem.isDirectory("C:/Users/" + dir + "/Saved Games/id Software/DOOM 2/WADs")) {
+					d2_addon_path = "C:/Users/" + dir + "/Saved Games/id Software/DOOM 2/WADs";
+					Sys.println("Doom II addon directory found");
+				}
+				if (d1_addon_path == null && d2_addon_path == null) {
+					Sys.println("No addon folders found");
+					return;
+				} else {
+					if (d1_addon_path != null) transfer_addons(d1_addon_path);
+					if (d2_addon_path != null) transfer_addons(d2_addon_path);
+				}
+			}
+		}
+	}
+	
+	static function transfer_addons(_path:String) 
+	{
+		Sys.println("Starting search for addons in " + _path);
+		var addons:Array<String>;
+		addons = FileSystem.readDirectory(_path);
+		var name:String;
+		for (dir in addons) {
+			var items:Array<String> = FileSystem.readDirectory(_path + "/" + dir);
+			var name:String = items[2].substr(0, items[2].length - 5).toUpperCase(); //The preview screenshots seem to reflect the wad names, so we'll rely on that for renaming the wads
+			if (FileSystem.exists("./output/" + name + ".WAD") || FileSystem.exists("./output/" + name + "UNITY.WAD")) continue;
+			else {
+				Sys.println("Transfering " + name);
+				if (name.toUpperCase() == "PLUTONIA" || name.toUpperCase() == "TNT") {
+					File.copy(_path + "/" + dir + "/" + dir, "./output/" + name.toUpperCase() + "UNITY.WAD");
+				} else {
+					File.copy(_path + "/" + dir + "/" + dir, "./output/" + name.toUpperCase() + ".WAD");
+				}
+			}
+		}
+		Sys.println("Done transfering addons in " + _path);
+	}
+	static function quit() {
+		Sys.println("Program has finished");
+		Sys.command("start", ["output"]);
+		Sys.exit(0);
 	}
 }
