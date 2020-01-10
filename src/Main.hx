@@ -85,7 +85,7 @@ class Main
 			}
 			Sys.println("Ultimate Doom Parsed...");
 			Sys.println("Writing Ultimate Doom IWAD...");
-			var d1_wad = File.write("./output/DOOM1_2019.WAD");
+			var d1_wad = File.write("./output/DOOM1UNITY.WAD");
 			var pos:Int = 0;
 			for (byte in d1_bytearray) {
 				d1_wad.writeByte(byte);
@@ -104,7 +104,7 @@ class Main
 			}
 			Sys.println("Doom II Parsed...");
 			Sys.println("Writing Doom II IWAD...");
-			var d2_wad = File.write("./output/DOOM2_2019.WAD");
+			var d2_wad = File.write("./output/DOOM2UNITY.WAD");
 			var pos:Int = 0;
 			for (byte in d2_bytearray) {
 				d2_wad.writeByte(byte);
