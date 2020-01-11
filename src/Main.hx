@@ -29,7 +29,12 @@ class Main
 	{
 		FileSystem.createDirectory("output");
 		
-		Sys.println("Unity Doom IWAD ripper");
+		Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
+		Sys.println("//Bethesda.net Doom wad ripper");
+		Sys.println("//Program by kevansevans");
+		Sys.println("//https://github.com/kevansevans/Unity-Doom-Ripper");
+		Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
+		Sys.println("");
 		Sys.println("Checking default Bethesda games install...");
 		
 		checkIfGamesAreThere(default_install_path);
@@ -72,11 +77,13 @@ class Main
 	static function extract() {
 		
 		if (d1_is_present) {
+			Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
 			Sys.println("Loading Ultimate Doom...");
 			d1_fileinput.bigEndian = true;
 			d1_bytes = d1_fileinput.readAll();
 			unityTextAssetReader(d1_bytes);
 			Sys.println("Ultimate Doom Extracted");
+			Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
 		}
 		
 		if (d2_is_present) {
@@ -85,9 +92,8 @@ class Main
 			d2_bytes = d2_fileinput.readAll();
 			unityTextAssetReader(d2_bytes);
 			Sys.println("Doom II Extracted");
+			Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
 		}
-		
-		Sys.println("WADS Extrtacted");
 	}
 	
 	static function unityTextAssetReader(_data:Bytes) {
@@ -142,7 +148,7 @@ class Main
 	static function checkForAddonFolder() 
 	{
 		var d1_addon_path:Null<String> = null;
-		var d2_addon_path:Null<String> = null;
+		var d2_addon_path:Null<String> = null; 
 		Sys.println("Scanning for addons...");
 		var folders:Array<String> = FileSystem.readDirectory("C:/Users");
 		for (dir in folders) {
@@ -158,6 +164,7 @@ class Main
 				}
 				if (d1_addon_path == null && d2_addon_path == null) {
 					Sys.println("No addon folders found");
+					Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
 					return;
 				} else {
 					if (d1_addon_path != null) transfer_addons(d1_addon_path);
@@ -178,7 +185,7 @@ class Main
 			var name:String = items[2].substr(0, items[2].length - 5).toUpperCase(); //The preview screenshots seem to reflect the wad names, so we'll rely on that for renaming the wads
 			if (FileSystem.exists("./output/" + name + ".WAD") || FileSystem.exists("./output/" + name + "UNITY.WAD")) continue;
 			else {
-				Sys.println("Transfering " + name);
+				Sys.println("Addon found:  " + name);
 				if (name.toUpperCase() == "PLUTONIA" || name.toUpperCase() == "TNT") {
 					File.copy(_path + "/" + dir + "/" + dir, "./output/" + name.toUpperCase() + "UNITY.WAD");
 				} else {
@@ -187,10 +194,16 @@ class Main
 			}
 		}
 		Sys.println("Done transfering addons in " + _path);
+		Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
 	}
 	static function quit() {
 		Sys.println("Program has finished");
+		Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
+		Sys.println("//Bethesda.net Doom wad ripper");
+		Sys.println("//Program by kevansevans");
+		Sys.println("//https://github.com/kevansevans/Unity-Doom-Ripper");
+		Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
 		Sys.command("start", ["output"]);
-		Sys.exit(0);
+		var cmd = Sys.stdin().readLine();
 	}
 }
