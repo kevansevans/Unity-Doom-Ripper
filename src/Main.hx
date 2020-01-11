@@ -4,6 +4,7 @@ import haxe.io.Bytes;
 import sys.FileSystem;
 import sys.io.File;
 import sys.io.FileInput;
+import sys.io.FileOutput;
 
 /**
  * ...
@@ -24,12 +25,6 @@ class Main
 	static var d2_fileinput:FileInput;
 	static var d1_bytes:Bytes;
 	static var d2_bytes:Bytes;
-	static var d1_magicstart:Int = 0x1082;
-	static var d1_magicend:Int = 0xBE5360;
-	static var d2_magicstart:Int = 0x1C4DEF;
-	static var d2_magicend:Int = 0x11974A2;
-	static var d1_bytearray:Array<Int>;
-	static var d2_bytearray:Array<Int>;
 	static function main() 
 	{
 		FileSystem.createDirectory("output");
@@ -78,42 +73,72 @@ class Main
 		
 		if (d1_is_present) {
 			Sys.println("Loading Ultimate Doom...");
+			d1_fileinput.bigEndian = true;
 			d1_bytes = d1_fileinput.readAll();
-			d1_bytearray = new Array();
-			for (byte in d1_magicstart...d1_magicend) {
-				d1_bytearray.push(d1_bytes.get(byte));
-			}
-			Sys.println("Ultimate Doom Parsed...");
-			Sys.println("Writing Ultimate Doom IWAD...");
-			var d1_wad = File.write("./output/DOOM1UNITY.WAD");
-			var pos:Int = 0;
-			for (byte in d1_bytearray) {
-				d1_wad.writeByte(byte);
-			}
-			d1_wad.close();
+			unityTextAssetReader(d1_bytes);
 			Sys.println("Ultimate Doom Extracted");
 		}
 		
 		if (d2_is_present) {
 			Sys.println("Loading Doom II...");
+			d2_fileinput.bigEndian = true;
 			d2_bytes = d2_fileinput.readAll();
-			d2_bytearray = new Array();
-			for (byte in d2_magicstart...d2_magicend) {
-				d2_bytearray.push(d2_bytes.get(byte));
-			}
-			Sys.println("Doom II Parsed...");
-			Sys.println("Writing Doom II IWAD...");
-			var d2_wad = File.write("./output/DOOM2UNITY.WAD");
-			var pos:Int = 0;
-			for (byte in d2_bytearray) {
-				d2_wad.writeByte(byte);
-			}
-			d2_wad.close();
+			unityTextAssetReader(d2_bytes);
 			Sys.println("Doom II Extracted");
 		}
 		
 		Sys.println("WADS Extrtacted");
 	}
+	
+	static function unityTextAssetReader(_data:Bytes) {
+		
+		var wadname:String = "";
+		var wadsize:Int = 0;
+		var wadout:FileOutput;
+		
+		for (byte in 0..._data.length) {
+			
+			if (byte + 4 >= _data.length) break;
+			
+			var wadcheck:String = _data.getString(byte, 4);
+			var skip = false;
+			
+			if (wadcheck == ".wad") {
+				var pos = byte;
+				while (_data.get(pos) != 0x00) {
+					--pos;
+					if (String.fromCharCode(_data.get(pos)) == "/") {
+						skip = true;
+						break;
+					}
+				}
+				++pos;
+				if (skip) continue;
+				
+				wadname = _data.getString(pos, (byte - pos));
+				
+				pos = byte;
+				while (_data.getString(pos, 4) != "IWAD" && _data.getString(pos, 4) != "PWAD") {
+					++pos;
+				}
+				wadsize = _data.get(pos - 4) | _data.get(pos - 3) << 8 | _data.get(pos - 2) << 16 | _data.get(pos - 1) << 24;
+				
+				Sys.println("WAD Found: " + wadname + " @" + wadsize + " bytes");
+				
+				if (_data.getString(pos, 4) == "IWAD") {
+					wadout = File.write("./output/" + wadname.toUpperCase() + "UNITY.WAD");
+					wadout.writeBytes(_data, pos, wadsize);
+					wadout.close();
+				} else if (_data.getString(pos, 4) == "PWAD" || _data.getString(pos, 4) == "PWAD") {
+					wadout = File.write("./output/" + wadname.toUpperCase() + ".WAD");
+					wadout.writeBytes(_data, pos, wadsize);
+					wadout.close();
+				}
+			} 
+		}
+	}
+	
+	
 	static function checkForAddonFolder() 
 	{
 		var d1_addon_path:Null<String> = null;
