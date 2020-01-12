@@ -135,7 +135,7 @@ class Main
 					wadout = File.write("./output/" + wadname.toUpperCase() + "UNITY.WAD");
 					wadout.writeBytes(_data, pos, wadsize);
 					wadout.close();
-				} else if (_data.getString(pos, 4) == "PWAD" || _data.getString(pos, 4) == "PWAD") {
+				} else if (_data.getString(pos, 4) == "PWAD") {
 					wadout = File.write("./output/" + wadname.toUpperCase() + ".WAD");
 					wadout.writeBytes(_data, pos, wadsize);
 					wadout.close();
@@ -182,7 +182,7 @@ class Main
 		var name:String;
 		for (dir in addons) {
 			var items:Array<String> = FileSystem.readDirectory(_path + "/" + dir);
-			var name:String = items[2].substr(0, items[2].length - 5).toUpperCase(); //The preview screenshots seem to reflect the wad names, so we'll rely on that for renaming the wads
+			name = items[2].substr(0, items[2].length - 5).toUpperCase(); //The preview screenshots seem to reflect the wad names, so we'll rely on that for renaming the wads
 			if (FileSystem.exists("./output/" + name + ".WAD") || FileSystem.exists("./output/" + name + "UNITY.WAD")) continue;
 			else {
 				Sys.println("Addon found:  " + name);
