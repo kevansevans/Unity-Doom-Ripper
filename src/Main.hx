@@ -35,9 +35,16 @@ class Main
 		Sys.println("//https://github.com/kevansevans/Unity-Doom-Ripper");
 		Sys.println("////////////////////////////////////////////////////////////////////////////////////////////////////");
 		Sys.println("");
-		Sys.println("Checking default Bethesda games install...");
+		Sys.println("Please provide the directory where Unity Doom (Bethesda.net) is installed. Hit Enter to assume default path: ");
+		Sys.println(default_install_path);
+		Sys.print(":> ");
 		
-		checkIfGamesAreThere(default_install_path);
+		var cmd = Sys.stdin().readLine();
+		if (cmd == "" || cmd == null) {
+			checkIfGamesAreThere(default_install_path);
+		} else {
+			checkIfGamesAreThere(cmd);
+		}
 		
 		checkForAddonFolder();
 		
@@ -64,8 +71,8 @@ class Main
 		}
 		
 		if (!d1_is_present && !d2_is_present) {
-			Sys.println("Doom games not found, please point me to the install folder! Type 'skip' to ignore this step");
-			Sys.print(":>");
+			Sys.println("Doom games not found, try again? Type 'skip' to ignore this step");
+			Sys.print(":> ");
 			var cmd = Sys.stdin().readLine();
 			checkIfGamesAreThere(cmd);
 			return;
