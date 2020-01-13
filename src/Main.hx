@@ -110,6 +110,14 @@ class Main
 			var skip = false;
 			
 			if (wadcheck == ".wad") {
+				
+				/*
+				 * This function parses through the byte data and finds wad names that denote the start of a wad.
+				 * These names are listed twice within the file, so in order to check which is which, it reads the
+				 * bytes until it hits 0x00 or "/". if it hits 0x00, we know we've found the start of a wad.
+				 * If we find "/", then we know to skip it as that's metadata for Unity to use. Or something.
+				 */
+				
 				var pos = byte;
 				while (_data.get(pos) != 0x00) {
 					--pos;
@@ -123,6 +131,12 @@ class Main
 				
 				wadname = _data.getString(pos, (byte - pos));
 				
+				/*
+				 * The start of the actual wad and wad size is inconsistently placed after the wad name.
+				 * Fortunately, the wad size is always the previous 4 bytes to the wad header.
+				 * We read ahead until we find "IWAD" or "PWAD", then use the previous 4 bytes to get the size.
+				 */
+				
 				pos = byte;
 				while (_data.getString(pos, 4) != "IWAD" && _data.getString(pos, 4) != "PWAD") {
 					++pos;
@@ -130,6 +144,12 @@ class Main
 				wadsize = _data.get(pos - 4) | _data.get(pos - 3) << 8 | _data.get(pos - 2) << 16 | _data.get(pos - 1) << 24;
 				
 				Sys.println("WAD Found: " + wadname + " @" + wadsize + " bytes");
+				
+				/*
+				 * Wad data is stored plainly within the asset file, we just have to copy the byte range into the new file.
+				 * We use the "UNITY" name to denote IWADS so other source ports can recognize them, as stated in the first
+				 * comment, these IWADS have minor changes.
+				 */
 				
 				if (_data.getString(pos, 4) == "IWAD") {
 					wadout = File.write("./output/" + wadname.toUpperCase() + "UNITY.WAD");
@@ -176,13 +196,21 @@ class Main
 	
 	static function transfer_addons(_path:String) 
 	{
+		/*
+		 * All we do here is scan the directories, then copy and paste the wads.
+		 * Names are infered by their screenshot preview name, they seem to reflect the original distributed wad name.
+		 * "UNITY" is appeneded to the Plutonia and TNT wads for the same reasons as stated above.
+		 * AFAIK there's no need to actually check if these are IWADS since they get downloaded into their
+		 * own respective folders, and I can assume wads will never replace a previous wad that's been downloaded.
+		 */
+		
 		Sys.println("Starting search for addons in " + _path);
 		var addons:Array<String>;
 		addons = FileSystem.readDirectory(_path);
 		var name:String;
 		for (dir in addons) {
 			var items:Array<String> = FileSystem.readDirectory(_path + "/" + dir);
-			name = items[2].substr(0, items[2].length - 5).toUpperCase(); //The preview screenshots seem to reflect the wad names, so we'll rely on that for renaming the wads
+			name = items[2].substr(0, items[2].length - 5).toUpperCase();
 			if (FileSystem.exists("./output/" + name + ".WAD") || FileSystem.exists("./output/" + name + "UNITY.WAD")) continue;
 			else {
 				Sys.println("Addon found:  " + name);
