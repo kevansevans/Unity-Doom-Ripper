@@ -1,0 +1,4 @@
+-cp src
+-dce full
+-cpp bin
+-main Main
