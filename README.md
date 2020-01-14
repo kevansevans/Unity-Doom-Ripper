@@ -14,7 +14,7 @@ UDR is only meant for the C++ target, obviously this won't work as a JavaScript 
 
 ##### Method 1
 
-* open terminal and run command ``haxe build.xml`` within the source directory
+* open terminal and run command ``haxe build.hxml`` within the source directory
 
 ##### Method 2
 
