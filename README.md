@@ -6,7 +6,7 @@ Program is relatively finished as is and serves it's purpose, and no updates are
 
 ## IMPORTANT!
 
-This program is mostly obsolete now. As of 03SEP202, the base IWADS of Doom and Doom II are now separate files and no longer need extraction. However, the Master Levels need to still need to be extracted, and the program should still work on earlier versions, which Bethesda allows the user to set to. The Steam version has it's IWADS exposed and can not be set back to an earlier version, so this program is useless for it.
+This program is mostly obsolete now. As of 03SEP2020, the base IWADS of Doom and Doom II are now separate files and no longer need extraction. However, the Master Levels need to still need to be extracted, and the program should still work on earlier versions, which Bethesda allows the user to set to. The Steam version has it's IWADS exposed and can not be set back to an earlier version, so this program is useless for it.
 
 Unity location: ``Bethesda.net Launcher\games\[Doom or Doom 2]_Classic_2019\[Doom or Doom 2]_Data\StreamingAssets``
 
